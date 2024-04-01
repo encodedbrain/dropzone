@@ -1,73 +1,110 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+# API para Upload e Download de Arquivos - NestJS, Prisma e PostgreSQL
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Visão Geral
+Este projeto tem como objetivo fornecer uma API robusta e eficiente para facilitar o upload e download de arquivos de forma rápida e fácil. Utiliza tecnologias modernas como NestJS, Prisma e PostgreSQL para garantir alta performance e escalabilidade. A API está em constante desenvolvimento para oferecer uma solução versátil para diferentes tipos de aplicativos que necessitam dessa funcionalidade.
 
-## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Funcionalidades
 
-## Installation
+**Upload de Arquivos:**  Permite que os usuários façam upload de arquivos de maneira rápida e eficiente.
+**Download de Arquivos:**  Possibilita o download dos arquivos previamente carregados na plataforma.
+
+
+## Instalação
+
+Instruções para Desenvolvedores
+
+**Clone o repositório:**
+bash
+Copy code
+``` bash
+git clone https://github.com/seu-usuario/upload-file-api.git
+```
+**Instale as dependências:**
+
+bash
+copie o código
+
+``` bash
+cd upload-file-api
+npm install
+```
+**Configure o banco de dados:**
+
+Configure as variáveis de ambiente no arquivo .env com as credenciais do seu banco de dados PostgreSQL.
+Execute as migrações do banco de dados usando 
+**Prisma:**
+bash
+Copie o código
 
 ```bash
-$ npm install
+npx prisma migrate dev
 ```
+**Execute o servidor de desenvolvimento:**
 
-## Running the app
-
+bash
+copie o código 
 ```bash
-# development
-$ npm run start
+npm run start:dev
+```
+## Variáveis de Ambiente
 
-# watch mode
-$ npm run start:dev
+Para rodar esse projeto, você vai precisar adicionar as seguintes variáveis de ambiente no seu .env
 
-# production mode
-$ npm run start:prod
+
+`DATABASE_URL`
+
+
+## Stack utilizada
+
+**Back-end:** NestJS
+Prisma
+PostgreSQL
+
+
+## Documentação da API
+
+#### enviando arquivo
+
+```http
+  POST /upload/file
 ```
 
-## Test
+| Parâmetro   | Tipo       | Descrição                           |
+| :---------- | :--------- | :---------------------------------- |
+| `File` | `string` | nome do arquivo |
+| `Date` | `string` | data do envio dd/mm/yyyy |
+| `Time` | `string` | horário do envio hh/mm/ss |
+| `Size` | `int` | tamanho do arquivo |
 
-```bash
-# unit tests
-$ npm run test
+#### Retorna um item
 
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+```http
+  GET /upload/${id}
 ```
 
-## Support
+| Parâmetro   | Tipo       | Descrição                                   |
+| :---------- | :--------- | :------------------------------------------ |
+| `id`      | `int` | identificador do arquivo |
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+#### deleta um item
 
-## Stay in touch
+```http
+  DELETE /upload/delete
+```
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+| Parâmetro   | Tipo       | Descrição                                   |
+| :---------- | :--------- | :------------------------------------------ |
+| `name`      | `string` | nome do arquivo |
 
-## License
 
-Nest is [MIT licensed](LICENSE).
+## Contribuindo
+
+**Contribua:** Sinta-se à vontade para contribuir com correções de bugs, melhorias no código ou sugestões para novos recursos. Todas as formas de contribuição são bem-vindas!
+**Contato**
+Para qualquer dúvida, sugestão ou problema relacionado a este projeto, entre em contato através do meu email 
+[marcodamasceno](mailto:marcodamasceno0101@outlook.com)
+ ou abra uma issue no GitHub.
+
+Agradeço o seu interesse em contribuir para tornar este projeto ainda melhor!
