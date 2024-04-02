@@ -11,6 +11,11 @@ import { DeleteDto } from "../dto/deleteDto";
 export class AppController {
   constructor ( private readonly appService : AppService ) {
   }
+  
+  @Get()
+  handleMessage(){
+    return this.appService.UploadMessage("welcome to my api");
+  }
 
   @Post ( "file"
   )
@@ -41,7 +46,7 @@ export class AppController {
   }
 
   @Get ( ":name" )
-  uploadGet (@Param("name") name: string) : any {
+  handleUploadGet (@Param("name") name: string) : any {
     this.appService.GetUploadFileDb (name).then ( ( res ) => {
       console.log ( res );
       return res;
@@ -49,7 +54,7 @@ export class AppController {
   }
 
   @Delete ( "delete" )
-  uploadDelete ( @Body () file : DeleteDto ) : any {
+  handleUploadDelete ( @Body () file : DeleteDto ) : any {
     this.appService.DeleteUploadFileDb ( file ).then ( res => {
       return res;
     } ).catch ( error => console.error ( error ) );

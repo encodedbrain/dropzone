@@ -7,6 +7,10 @@ import * as fs from 'fs-extra';
 @Injectable ()
 export class AppService {
 
+
+  UploadMessage(text: string) : string{
+    return text
+  }
   async UploadFileDb ( { originalname , size } : Express.Multer.File ) : Promise<any> {
 
     const date = new Date ().toLocaleDateString ( "pt-BR" );
