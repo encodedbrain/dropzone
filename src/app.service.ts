@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
-import { Injectable  } from "@nestjs/common";
-import { PrismaClient } from "@prisma/client";
-import { DeleteDto } from "../dto/deleteDto";
+import { Injectable } from '@nestjs/common';
+import { PrismaClient } from '@prisma/client';
+import { DeleteDto } from '../dto/deleteDto';
 import * as fs from 'fs-extra';
 
 @Injectable ()
@@ -35,8 +35,8 @@ export class AppService {
 
     return prisma.upload.findMany ( {
       where : {
-        File:{
-          startsWith: name
+        File : {
+          startsWith : name
         }
       }
     } );
@@ -49,7 +49,7 @@ export class AppService {
     return prisma.upload.deleteMany ( {
       where : {
         id : {
-          equals: file.id
+          equals : file.id
         }
       }
 

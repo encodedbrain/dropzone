@@ -11,7 +11,7 @@ import { DeleteDto } from "../dto/deleteDto";
 export class AppController {
   constructor ( private readonly appService : AppService ) {
   }
-  
+
   @Get()
   handleMessage(){
     return this.appService.UploadMessage("welcome to my api");
@@ -23,7 +23,7 @@ export class AppController {
     storage : diskStorage ( {
       destination : "./files" ,
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      filename ( req : e.Request , file : Express.Multer.File , callback : ( error : ( Error | null ) , filename : string ) =>
+      filename ( _req : e.Request , file : Express.Multer.File , callback : ( error : ( Error | null ) , filename : string ) =>
         void ) {
         const D = new Date()
         const year = D.getFullYear();
@@ -46,15 +46,16 @@ export class AppController {
   }
 
   @Get ( ":name" )
-  handleUploadGet (@Param("name") name: string) : any {
-    this.appService.GetUploadFileDb (name).then ( ( res ) => {
-      console.log ( res );
-      return res;
-    } ).catch ( ( error : any ) => console.error ( error ) );
+ async handleUploadGet (@Param("name") name: string) : Promise<any> {
+    this.appService.GetUploadFileDb (name).then(response => response).then( data =>
+    {
+      console.log(data)
+      return data
+    }).catch( error => console.error(error))
   }
 
   @Delete ( "delete" )
-  handleUploadDelete ( @Body () file : DeleteDto ) : any {
+async  handleUploadDelete ( @Body () file : DeleteDto ) : Promise<any>{
     this.appService.DeleteUploadFileDb ( file ).then ( res => {
       return res;
     } ).catch ( error => console.error ( error ) );
