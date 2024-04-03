@@ -54,6 +54,10 @@ Para rodar esse projeto, você vai precisar adicionar as seguintes variáveis de
 
 
 `DATABASE_URL`
+- referente a uri do banco de dados
+  
+`PORT`
+- referente a porta onde o servidor ira rodar
 
 
 ## Stack utilizada
