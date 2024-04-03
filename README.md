@@ -65,6 +65,16 @@ PostgreSQL
 
 ## Documentação da API
 
+```Postgres Table```
+
+| Parâmetro   | Tipo       | Descrição                           |
+| :---------- | :--------- | :---------------------------------- |
+| `File` | `string` | nome do arquivo |
+| `Date` | `string` | data do envio dd/mm/yyyy |
+| `Time` | `string` | horário do envio hh/mm/ss |
+| `Size` | `int` | tamanho do arquivo |
+
+
 #### enviando arquivo
 
 ```http
@@ -73,10 +83,7 @@ PostgreSQL
 
 | Parâmetro   | Tipo       | Descrição                           |
 | :---------- | :--------- | :---------------------------------- |
-| `File` | `string` | nome do arquivo |
-| `Date` | `string` | data do envio dd/mm/yyyy |
-| `Time` | `string` | horário do envio hh/mm/ss |
-| `Size` | `int` | tamanho do arquivo |
+| `File` | `formData` | file |
 
 #### Retorna um item
 
@@ -86,7 +93,7 @@ PostgreSQL
 
 | Parâmetro   | Tipo       | Descrição                                   |
 | :---------- | :--------- | :------------------------------------------ |
-| `id`      | `int` | identificador do arquivo |
+| `name`      | `string` | nome do arquivo |
 
 #### deleta um item
 
@@ -96,6 +103,7 @@ PostgreSQL
 
 | Parâmetro   | Tipo       | Descrição                                   |
 | :---------- | :--------- | :------------------------------------------ |
+| `id`      | `integer` | id do arquivo |
 | `name`      | `string` | nome do arquivo |
 
 
