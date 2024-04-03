@@ -5,14 +5,13 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url  = env("DATABASE_URL")
+  url      = env("DATABASE_URL")
 }
 
-
-model Upload  {
-  id Int @id @default(autoincrement())
+model Upload {
+  id   Int    @id @default(autoincrement())
   File String
   Date String
-  Time String
   Size Int
+  Time String
 }
