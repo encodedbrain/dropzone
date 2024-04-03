@@ -14,15 +14,24 @@ export class AppService {
   async UploadFileDb ( { originalname , size } : Express.Multer.File ) : Promise<any> {
 
     const date = new Date ().toLocaleDateString ( "pt-BR" );
+    const RandomInteger = Math.floor((Math.random() * 1000)* 1000);
     const currentTime = new Date ().toLocaleTimeString ( "pt-BR" , { hour12 : false } );
     const prisma = new PrismaClient ();
     const ext = originalname.split ( "." );
-    const absolutePath = `${ ext[ 0 ] }-${ date }.${ ext[ 1 ] }`;
+    const fileName = `${ ext[ 0 ] }${ RandomInteger }`;
+
+    const fileExists = await prisma.upload.findFirst({
+      where:{
+        File: fileName
+      }
+    });
+
+    if(fileExists) return "operation failed: file name must be unique";
 
     return prisma.upload.create ( {
       data : {
         Date : date ,
-        File : absolutePath ,
+        File : fileName,
         Size : size ,
         Time : currentTime
       }
@@ -32,6 +41,15 @@ export class AppService {
 
   async GetUploadFileDb (name: string) : Promise<any> {
     const prisma = new PrismaClient ();
+
+    const fileExists = await prisma.upload.findFirst({
+      where:{
+        File: {
+          equals:name,
+        }
+      }
+    });
+    if(!fileExists) return "operation failed: file does not exist"
 
     return prisma.upload.findMany ( {
       where : {
@@ -44,29 +62,39 @@ export class AppService {
 
 
   async DeleteUploadFileDb ( file : DeleteDto ) : Promise<any> {
+
     const prisma = new PrismaClient ();
 
-    return prisma.upload.deleteMany ( {
+    const fileExists = await prisma.upload.count({
+      where:{
+        id:{
+          equals: file.id
+        }
+      }
+    });
+
+    if(fileExists < 1) return "operation failed: file does not exist"
+    const  checkNumberOfFiles = Number(fileExists) < 1 ? 'file were deleted' : 'files were deleted';
+
+    await prisma.upload.deleteMany ( {
       where : {
         id : {
           equals : file.id
         }
       }
-
     } );
+
+    return  `operation completed successfully: ${fileExists } ${checkNumberOfFiles}`
   }
 
   async DeleteUploadFileLocal ( file : DeleteDto ) : Promise<string>{
 
-    const date = new Date();
-    const day = date.getDate();
-    const month = date.getMonth() + 1;
-    const year = date.getFullYear();
+    const RandomInteger = Math.floor((Math.random() * 1000)* 1000);
 
 
     const folder = "files";
     const ext = file.name.split(".");
-    const fileName = `${ext[0]}-${day}-${month}-${year}.${ext[1]}`;
+    const fileName = `${ext[0]}${RandomInteger}`;
     const filePath = `${folder}/${fileName}`;
 
       try {

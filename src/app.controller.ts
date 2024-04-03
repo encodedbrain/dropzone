@@ -22,7 +22,6 @@ export class AppController {
   @UseInterceptors ( FileInterceptor ( "file" , {
     storage : diskStorage ( {
       destination : "./files" ,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       filename ( _req : e.Request , file : Express.Multer.File , callback : ( error : ( Error | null ) , filename : string ) =>
         void ) {
         const D = new Date()
@@ -37,30 +36,26 @@ export class AppController {
     } )
   } ) )
   async handleUploadFile ( @UploadedFile () file : Express.Multer.File ) : Promise<any> {
-    if ( ! file ) return false;
-    try {
-      return await this.appService.UploadFileDb ( file );
-    } catch ( error ) {
-      return error;
-    }
+    if(!file) return  "operation failed: something is missing here";
+    return await this.appService.UploadFileDb ( file ).then(response =>  response).catch(error => error);
   }
 
   @Get ( ":name" )
  async handleUploadGet (@Param("name") name: string) : Promise<any> {
-    this.appService.GetUploadFileDb (name).then(response => response).then( data =>
-    {
-      console.log(data)
-      return data
-    }).catch( error => console.error(error))
+    if(!name) return "operation failed: the name for the file was not provided"
+    return this.appService.GetUploadFileDb (name).then(response => response).catch(error => error);
   }
 
   @Delete ( "delete" )
 async  handleUploadDelete ( @Body () file : DeleteDto ) : Promise<any>{
-    this.appService.DeleteUploadFileDb ( file ).then ( res => {
-      return res;
-    } ).catch ( error => console.error ( error ) );
+
+    if(!file.id) return "operation failed: the identifier for the file was not provided"
+    if(!file.name) return "operation failed: the name for the file was not provided"
 
     this.appService.DeleteUploadFileLocal ( file).then (  res => res)
+
+    return this.appService.DeleteUploadFileDb ( file ).then ( res => res ).catch ( error =>  error );
+
   }
 
 }
