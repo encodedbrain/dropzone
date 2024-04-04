@@ -1,4 +1,3 @@
-export class DeleteDto {
-  id: number;
+export class DeleteDTO {
   name: string;
 }
