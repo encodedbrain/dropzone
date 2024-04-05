@@ -1,11 +1,15 @@
 /* eslint-disable prettier/prettier */
-import { Injectable } from '@nestjs/common';
+import { Injectable , Res , StreamableFile } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { DeleteDTO } from '../dto/deleteDTO';
 import * as fs from 'fs-extra';
 import { CreateUserDTO } from '../dto/createUserDTO';
 import { UserDTO } from '../dto/userDTO';
-import { GetFileDTO } from '../dto/getFileDTO';
+import { ReadFileDTO } from '../dto/readFileDTO';
+import { ReadFileDownload } from '../dto/readFileDownload';
+import { join } from 'node:path';
+import { createReadStream } from 'fs';
+import process from 'node:process';
 
 @Injectable ()
 export class AppService {
@@ -15,7 +19,7 @@ export class AppService {
     return text
   }
 
-  async GetUploadFileDb (user: GetFileDTO) : Promise<any> {
+  async GetFileDb (user: ReadFileDTO) : Promise<any> {
     const prisma = new PrismaClient ();
 
     const userExists = await prisma.user.findFirst({
@@ -40,6 +44,62 @@ export class AppService {
     if(!fileExists) return "operation failed: file does not exist"
 
     return fileExists
+  }
+
+  async GetAllFileDb (user: ReadFileDTO) : Promise<any> {
+    const prisma = new PrismaClient ();
+
+    const userExists = await prisma.user.findFirst({
+      where:{
+        email: user.email,
+        password: user.password
+      }
+    })
+
+    if(!userExists) return "operation failed: user does not exist"
+
+    const fileExists = await prisma.file.findMany({
+      where:{
+        authorId: userExists.id
+      }
+    })
+
+    return fileExists;
+  }
+
+  async DownloadFile(user: ReadFileDownload , @Res() res: any) : Promise<any> {
+
+    const prisma = new PrismaClient ();
+
+    const userExists = await prisma.user.findFirst({
+      where:{
+        email: user.email,
+        password: user.password
+      }
+    })
+
+    if(!userExists) return "operation failed: invalid credentials or non-existent user";
+
+    const folder = "./files";
+
+    fs.readdir(folder , (err, files) => {
+      if (err) return `error when searching for file: ${err}`
+      files.forEach(file => {
+        const pathComplete = `${folder}/${file}` ;
+        fs.stat(pathComplete, (err, statistics) => {
+          if (err) return `error getting file information: ${err}`;
+          if (statistics.isFile()) {
+            if(pathComplete.length < 1) return "operation failed: file does not exist"
+          }
+        });
+      });
+    });
+    const file = createReadStream(join(process.cwd(), `files/${user.filename}`))
+    res.set({
+      'Content-Type': 'image/*',
+      'Content-Disposition': `attachment; filename="${user.filename}"`,
+    });
+    return new StreamableFile(file);
   }
 
   async CreateNewUser(User: CreateUserDTO):Promise<any>{
