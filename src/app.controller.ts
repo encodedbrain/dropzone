@@ -4,7 +4,7 @@ import {
   Controller ,
   Delete ,
   Get , Headers , Param ,
-  Post , Res  ,
+  Post  , Res ,
   UploadedFile , UseInterceptors ,
 } from '@nestjs/common';
 import { AppService } from "./app.service";
@@ -41,6 +41,11 @@ export class AppController {
   async handleGetFileDownload(@Param("filename") filename : string ,  @Headers("email") email : string, @Headers("password") password: string , @Res({ passthrough: true }) res: any) : Promise<any> {
     if (!email || !password)  return "operation failed: There's something missing here"
    return await this.appService.DownloadFile({filename,email,password} , res).then(response => response).catch(error => error);
+  }
+
+  @Get("user/file/:filename")
+  async handleGetFile(@Param("filename") filename : string , @Res() res : any ) : Promise<any> {
+    return await this.appService.ExposeFile(filename , res).then(response => response).catch(error => error);
   }
 
   @Post ( "user/file/upload"

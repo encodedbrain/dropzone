@@ -9,7 +9,8 @@ import { ReadFileDTO } from '../dto/readFileDTO';
 import { ReadFileDownload } from '../dto/readFileDownload';
 import { join } from 'node:path';
 import { createReadStream } from 'fs';
-import process from 'node:process';
+import {Response} from 'express';
+import * as process from 'node:process';
 
 @Injectable ()
 export class AppService {
@@ -100,6 +101,10 @@ export class AppService {
       'Content-Disposition': `attachment; filename="${user.filename}"`,
     });
     return new StreamableFile(file);
+  }
+
+  async ExposeFile(filename : string , @Res() res: Response ) : Promise<any> {
+    return res.sendFile ( join ( process.cwd() , './files/' + filename ) );
   }
 
   async CreateNewUser(User: CreateUserDTO):Promise<any>{
