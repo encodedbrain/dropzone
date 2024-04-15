@@ -7,7 +7,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   await app.listen(port);
   app.enableCors({
-    origin: ['https://upload-api-production-d6dc.up.railway.app/v1'],
+    origin: [process.env.ORIGIN],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: [
       'Content-Type',
