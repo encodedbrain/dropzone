@@ -12,9 +12,9 @@ import { diskStorage } from "multer";
 import { DeleteDTO } from "../dto/deleteDTO";
 import { CreateUserDTO } from '../dto/createUserDTO';
 import { FileInterceptor } from '@nestjs/platform-express';
-import e  from 'express';
 import { ReadFileDTO } from '../dto/readFileDTO';
 import { GuardGuard } from './guard/guard.guard';
+import e from 'express';
 
 @Controller ("v1")
 export class AppController {
