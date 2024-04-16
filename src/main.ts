@@ -4,21 +4,14 @@ import * as process from 'process';
 
 const port = process.env.PORT || 3000;
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    bodyParser: true,
+  });
   await app.listen(port);
   app.enableCors({
-    origin: [process.env.ORIGIN],
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    allowedHeaders: [
-      'Content-Type',
-      'Origin',
-      'X-Requested-With',
-      'Accept',
-      'Authorization',
-    ],
-    exposedHeaders: ['Authorization'],
+    allowedHeaders: '*',
+    origin: '*',
     credentials: true,
-    maxAge: 86400,
   });
 }
 bootstrap().then((r) => r);
