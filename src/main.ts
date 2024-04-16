@@ -5,13 +5,9 @@ import * as process from 'process';
 const port = process.env.PORT || 3000;
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
-    bodyParser: true,
+    cors: true,
   });
   await app.listen(port);
-  app.enableCors({
-    allowedHeaders: '*',
-    origin: '*',
-    credentials: true,
-  });
+  app.enableCors();
 }
 bootstrap().then((r) => r);
