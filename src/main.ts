@@ -8,7 +8,7 @@ async function bootstrap() {
   await app.listen(port);
   app.enableCors({
     origin: [process.env.ORIGIN],
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: [
       'Content-Type',
       'Origin',
@@ -18,6 +18,7 @@ async function bootstrap() {
     ],
     exposedHeaders: ['Authorization'],
     credentials: true,
+    maxAge: 86400,
   });
 }
 bootstrap().then((r) => r);
