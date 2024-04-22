@@ -14,7 +14,9 @@ import { CreateUserDTO } from '../dto/createUserDTO';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ReadFileDTO } from '../dto/readFileDTO';
 import { GuardGuard } from './guard/guard.guard';
-import e from 'express';
+import e, { Response } from 'express';
+import { Methods } from '../utils/methods';
+
 
 @Controller("v1")
 export class AppController {
@@ -40,14 +42,12 @@ export class AppController {
     return this.appService.GetAllFileDb(user).then(response => response).catch(error => error);
   }
 
-  @UseGuards(GuardGuard)
   @Get("user/file/download/:filename")
   async handleGetFileDownload(@Param("filename") filename: string, @Headers("email") email: string, @Headers("password") password: string, @Res({ passthrough: true }) res: any): Promise<any> {
     if (!email || !password) return "operation failed: There's something missing here"
     return await this.appService.DownloadFile({ filename, email, password }, res).then(response => response).catch(error => error);
   }
 
-  @UseGuards(GuardGuard)
   @Get("user/file/:filename")
   async handleGetFile(@Param("filename") filename: string, @Res() res: any): Promise<any> {
     return await this.appService.ExposeFile(filename, res).then(response => response).catch(error => error);
@@ -61,14 +61,15 @@ export class AppController {
       destination: "./files",
       filename(_req: e.Request, file: Express.Multer.File, callback: (error: (Error | null), filename: string) =>
         void) {
-        const filename = file.originalname;
+        const filename = Methods.handleFormatingFilename(file.originalname);
         callback(null, filename);
       }
     })
   }))
-  async handleCreateFile(@UploadedFile() file: Express.Multer.File, @Headers("Email") Email: string, @Headers("Password") Password: string,): Promise<any> {
+  async handleCreateFile(@UploadedFile() file: Express.Multer.File, @Headers("Email") Email: string, @Headers("Password") Password: string, @Res() response: Response): Promise<any> {
     if (!file) return "operation failed: something is missing here";
-    return await this.appService.CreateFileUserDb(file, Email, Password).then(response => response).catch(error => error);
+    
+    return await this.appService.CreateFileUserDb(file, Email, Password , response).then(response => response).catch(error => error);
   }
 
   @Post("user/create")
