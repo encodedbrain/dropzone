@@ -12,6 +12,7 @@ import { createReadStream } from 'fs';
 import { Response } from 'express';
 import * as process from 'node:process';
 import { compare, hash } from "bcrypt";
+import { Methods } from '../utils/methods';
 
 @Injectable()
 export class AppService {
@@ -95,7 +96,7 @@ export class AppService {
     });
     const file = createReadStream(join(process.cwd(), `files/${User.filename}`))
     res.set({
-      'Content-Type': 'image/*',
+      'Content-Type': 'image/jpeg',
       'Content-Disposition': `attachment; filename="${User.filename}"`,
     });
     return new StreamableFile(file);
@@ -141,24 +142,24 @@ export class AppService {
     return "user created successfully";
   }
 
-  async CreateFileUserDb(File: Express.Multer.File, email: string, password: string): Promise<any> {
+  async CreateFileUserDb(File: Express.Multer.File, email: string, password: string, @Res() res: Response): Promise<any> {
 
     const prisma = new PrismaClient();
 
     const user = await prisma.user.findUnique({ where: { email: email } })
 
-    if (!user) return "operation failed: user does not exist"
+    if (!user) return res.status(400).send("operation failed: user does not exist")
 
     const encodedPassword = await compare(password, user.password);
 
-    if (!encodedPassword) return "operation failed: these credentials do not correspond to any user"
+    if (!encodedPassword) return res.status(200).send("operation failed: these credentials do not correspond to any user")
 
-    const extension = [ "jpg", "gif", "png", "svg", "psd", "raw", "tiff", "bmp", "jpeg",
+    const extension = ["jpg", "gif", "png", "svg", "psd", "raw", "tiff", "bmp", "jpeg",
       "docx", "pdf", "txt", "xlsx"]
 
     const fileExtension = File.originalname.split(".")[1]
 
-    if(!extension.includes(fileExtension))  return  "operation failed: extension format not supported"
+    if (!extension.includes(fileExtension)) return res.status(400).send("operation failed: extension format not supported")
 
     const fileExists = await prisma.file.findFirst({
       where: {
@@ -170,7 +171,12 @@ export class AppService {
       }
     })
 
-    if (fileExists) return "operation failed: file already exists";
+    if (fileExists) return res.status(400).send("operation failed: file already exists")
+
+
+    const filename = Methods.handleFormatingFilename(File.originalname);
+
+    if(!filename) return
 
     await prisma.user.update({
       where: {
@@ -180,7 +186,7 @@ export class AppService {
       data: {
         file: {
           create: {
-            File: File.originalname,
+            File: filename,
             Date: String(new Date()),
             Time: String(new Date()),
             Size: File.size
@@ -189,7 +195,7 @@ export class AppService {
       }
     });
 
-    return "operation completed: add new file";
+    return res.status(201).send("operation completed: add new file");
 
   }
 
@@ -205,7 +211,7 @@ export class AppService {
 
     if (!encodedPassword) return "operation failed: these credentials do not correspond to any user"
 
-    const {count} =  await prisma.file.deleteMany({
+    const { count } = await prisma.file.deleteMany({
       where: {
         authorId: {
           equals: user.id
@@ -214,7 +220,7 @@ export class AppService {
       }
     });
 
-    if(count < 1) return "operation failed: file no deleted";
+    if (count < 1) return "operation failed: file no deleted";
 
     return `operation completed successfully`
   }
