@@ -29,7 +29,7 @@ export class AppService {
 
     if (!user) return "operation failed: user does not exist"
 
-    const encodedPassword = await compare(User.password, user.password);
+    const encodedPassword = await compare((User.password), user.password);
 
     if (!encodedPassword) return "operation failed: these credentials do not correspond to any user"
 
@@ -96,7 +96,7 @@ export class AppService {
     });
     const file = createReadStream(join(process.cwd(), `files/${User.filename}`))
     res.set({
-      'Content-Type': 'image/jpeg',
+      'Content-Type': 'image/*',
       'Content-Disposition': `attachment; filename="${User.filename}"`,
     });
     return new StreamableFile(file);
@@ -166,7 +166,7 @@ export class AppService {
         authorId: {
           equals: user.id
         }, File: {
-          equals: File.originalname
+          equals: Methods.handleFormatingFilename(File.originalname)
         }
       }
     })
