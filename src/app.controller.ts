@@ -68,8 +68,8 @@ export class AppController {
   }))
   async handleCreateFile(@UploadedFile() file: Express.Multer.File, @Headers("Email") Email: string, @Headers("Password") Password: string, @Res() response: Response): Promise<any> {
     if (!file) return "operation failed: something is missing here";
-    
-    return await this.appService.CreateFileUserDb(file, Email, Password , response).then(response => response).catch(error => error);
+
+    return await this.appService.CreateFileUserDb(file, Email, Password, response).then(response => response).catch(error => error);
   }
 
   @Post("user/create")
@@ -84,9 +84,9 @@ export class AppController {
 
     if (!file.name || !email || !password) return "operation failed: the name for the file was not provided"
 
-    this.appService.DeleteUploadFileLocal(file).then(res => res)
+    this.appService.DeleteUploadFileLocal(file).then(response => response)
 
-    return this.appService.DeleteUploadFileDb(file, { email, password }).then(res => res).catch(error => error);
+    return this.appService.DeleteUploadFileDb(file, { email, password }).then(response => response).catch(error => error);
 
   }
 
