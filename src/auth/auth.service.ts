@@ -32,8 +32,10 @@ export class AuthService {
     user.password = '';
 
     return {
-      token: await this.jwtService.signAsync(payload),
-      user: user,
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      token: await this.jwtService.signAsync(payload)
     };
   }
 }
