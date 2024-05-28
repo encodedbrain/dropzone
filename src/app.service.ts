@@ -3,7 +3,6 @@ import { Injectable, Res, StreamableFile } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { DeleteDTO } from '../dto/deleteDTO';
 import * as fs from 'fs-extra';
-import { CreateUserDTO } from '../dto/createUserDTO';
 import { UserDTO } from '../dto/userDTO';
 import { ReadFileDTO } from '../dto/readFileDTO';
 import { ReadFileDownload } from '../dto/readFileDownload';
@@ -11,8 +10,8 @@ import { join } from 'node:path';
 import { createReadStream } from 'fs';
 import { Response } from 'express';
 import * as process from 'node:process';
-import { compare, hash } from "bcrypt";
 import { Methods } from '../utils/methods';
+import { compare } from 'bcrypt';
 
 @Injectable()
 export class AppService {
@@ -106,41 +105,6 @@ export class AppService {
     return res.sendFile(join(process.cwd(), './files/' + filename));
   }
 
-  async CreateNewUser(User: CreateUserDTO): Promise<any> {
-    const prisma = new PrismaClient();
-    const rgxEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const rgxName = /^[a-zA-Z\s]+$/;
-    const rgxPwd = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    const maxLength = 31
-
-
-    if (!rgxEmail.test(User.email)) return "operation failed: email format not supported"
-    if (!rgxName.test(User.name)) return "operation failed: name format not supported"
-    if (!rgxPwd.test(User.password)) return "operation failed: password format not supported"
-    if (User.name.length > maxLength) return "operation failed: name too long, please abbreviate your name"
-
-    const userExists = await prisma.user.findFirst({
-      where: {
-        name: {
-          equals: User.name
-        }
-      }
-    });
-
-    if (userExists) return "operation failed: this user already exists"
-
-    const encodedPassword = await hash(User.password, 10);
-
-    await prisma.user.create({
-      data: {
-        name: User.name,
-        email: User.email,
-        password: encodedPassword
-      }
-    });
-
-    return "user created successfully";
-  }
 
   async CreateFileUserDb(File: Express.Multer.File, email: string, password: string, @Res() res: Response): Promise<any> {
 
