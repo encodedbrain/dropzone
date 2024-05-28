@@ -6,8 +6,8 @@ import { AuthUserDTO } from '../../dto/authUserDTO';
 @Controller('v1')
 export class AuthController {
   constructor(private readonly authService: AuthService) { }
-  @Post('login')
- async signIn(@Body() signInDto: AuthUserDTO): Promise<any> {
+  @Post('signin')
+  async signIn(@Body() signInDto: AuthUserDTO): Promise<any> {
     if (!signInDto.name || !signInDto.password) return
     return await this.authService.signIn(signInDto);
   }
