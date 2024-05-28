@@ -17,11 +17,8 @@ export class AuthService {
   async signIn(signInDto: AuthUserDTO): Promise<any> {
 
     const user = await this.usersService.findOne(signInDto);
-    console.log("dados chegou signin", signInDto)
 
     if (!user) throw new UnauthorizedException();
-
-    console.log("usuario", user)
 
     if (!(await compare(String(signInDto.password), String(user?.password)))) {
       throw new UnauthorizedException();
