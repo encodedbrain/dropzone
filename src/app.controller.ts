@@ -10,7 +10,6 @@ import {
 import { AppService } from "./app.service";
 import { diskStorage } from "multer";
 import { DeleteDTO } from "../dto/deleteDTO";
-import { CreateUserDTO } from '../dto/createUserDTO';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ReadFileDTO } from '../dto/readFileDTO';
 import { GuardGuard } from './guard/guard.guard';
@@ -70,12 +69,6 @@ export class AppController {
     if (!file) return "operation failed: something is missing here";
 
     return await this.appService.CreateFileUserDb(file, Email, Password, response).then(response => response).catch(error => error);
-  }
-
-  @Post("user/create")
-  async handleCreateNewUser(@Body() User: CreateUserDTO): Promise<any> {
-    if (!User.password || !User.email || !User.name) return "operation failed: something missing here"
-    return await this.appService.CreateNewUser(User).then(response => response).catch(error => error);
   }
 
   @UseGuards(GuardGuard)
