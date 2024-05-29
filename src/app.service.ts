@@ -7,8 +7,6 @@ import { UserDTO } from '../types/user/IUserDTO';
 import { ReadFileDTO } from '../types/file/IReadFileDTO';
 import { ReadFileDownloadDTO } from '../types/file/IReadFileDownload';
 import { join } from 'node:path';
-import { createReadStream } from 'fs';
-import { Response } from 'express';
 import * as process from 'node:process';
 import { Methods } from '../utils/methods';
 import { compare } from 'bcrypt';
@@ -115,58 +113,29 @@ export class AppService {
 
     const { email, file, response } = credentials
 
-    const prisma = new PrismaClient();
+    const user = await prisma.user.findUnique({ where: { email } })
 
-    const user = await prisma.user.findUnique({ where: { email: email } })
+    if (!user) return credentials.response.status(400).send("operation failed: user does not exist")
 
-    if (!user) return res.status(400).send("operation failed: user does not exist")
+    const originalname = file.originalname
 
-    const encodedPassword = await compare(password, user.password);
+    File.handleVerifyExtension({ originalname, response })
 
-    if (!encodedPassword) return res.status(200).send("operation failed: these credentials do not correspond to any user")
+    File.handleVerifyExists({ id: user.id, originalname, response })
 
-    const extension = ["jpg", "gif", "png", "svg", "psd", "raw", "tiff", "bmp", "jpeg",
-      "docx", "pdf", "txt", "xlsx"]
+    const filename = General.handleFormatingFilename(originalname);
 
-    const fileExtension = File.originalname.split(".")[1]
+    if (!filename) return
 
-    if (!extension.includes(fileExtension)) return res.status(400).send("operation failed: extension format not supported")
-
-    const fileExists = await prisma.file.findFirst({
-      where: {
-        authorId: {
-          equals: user.id
-        }, File: {
-          equals: Methods.handleFormatingFilename(File.originalname)
-        }
-      }
-    })
-
-    if (fileExists) return res.status(400).send("operation failed: file already exists")
-
-
-    const filename = Methods.handleFormatingFilename(File.originalname);
-
-    if(!filename) return
-
-    await prisma.user.update({
-      where: {
-        email: email,
-        password: user.password
-      },
-      data: {
-        file: {
-          create: {
-            File: filename,
-            Date: String(new Date()),
-            Time: String(new Date()),
-            Size: File.size
-          }
-        }
-      }
-    });
-
-    return res.status(201).send("operation completed: add new file");
+    const data: ICreatingFileDTO = {
+      email,
+      File: originalname,
+      Date: String(new Date()),
+      Time: String(new Date()),
+      Size: file.size,
+      response
+    }
+    File.handleCreate(data)
 
   }
 
