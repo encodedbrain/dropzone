@@ -54,8 +54,7 @@ export class AppService {
     return fileExists
   }
 
-  async GetAllFileDb(User: ReadFileDTO): Promise<any> {
-    const prisma = new PrismaClient();
+  async GetAllFileDb(User: ReadFileDTO): Promise<IGetAllFileDbDTO[] | string> {
 
     const user = await prisma.user.findUnique({ where: { email: User.email } })
 
@@ -74,7 +73,7 @@ export class AppService {
     return fileExists;
   }
 
-  async DownloadFile(User: ReadFileDownload, @Res() res: any): Promise<any> {
+  async DownloadFile(credentials: ReadFileDownloadDTO): Promise<StreamableFile | string> {
 
     const prisma = new PrismaClient();
 
