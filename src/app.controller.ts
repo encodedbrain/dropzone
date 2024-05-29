@@ -44,9 +44,9 @@ export class AppController {
   }
 
   @Get("user/file/download/:filename")
-  async handleGetFileDownload(@Param("filename") filename: string, @Headers("email") email: string, @Headers("password") password: string, @Res({ passthrough: true }) res: any): Promise<any> {
-    if (!email || !password) return "operation failed: There's something missing here"
-    return await this.appService.DownloadFile({ filename, email, password }, res).then(response => response).catch(error => error);
+  async handleGetFileDownload(@Param("filename") filename: string, @Headers("email") email: string, @Res({ passthrough: true }) response: Response): Promise<StreamableFile | string> {
+    if (!email || !filename) return "operation failed: There's something missing here"
+    return await this.appService.DownloadFile({ filename, email, response }).then(response => response).catch(error => error);
   }
 
   @Get("user/file/:filename")
