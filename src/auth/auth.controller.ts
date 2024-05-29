@@ -9,7 +9,7 @@ import { ICreateUserDTO } from 'types/user/ICreateUserDTO';
 export class AuthController {
   constructor(private readonly authService: AuthService) { }
   @Post('signin')
-  async signIn(@Body() signInDto: AuthUserDTO): Promise<any> {
+  async signIn(@Body() signInDto: IAuthUserDTO): Promise<any> {
     if (!signInDto.name || !signInDto.password) return
     return await this.authService.signIn(signInDto);
   }
