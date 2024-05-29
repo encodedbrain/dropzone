@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { Injectable } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
-import { AuthUserDTO } from 'dto/authUserDTO';
+import { IAuthUserDTO } from 'types/user/IAuthUserDTO';
 
 export type User = {
   id: number;
