@@ -1,17 +1,24 @@
 /* eslint-disable prettier/prettier */
-import { Injectable, Res, StreamableFile } from '@nestjs/common';
+import { Injectable, StreamableFile } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
-import { DeleteDTO } from '../dto/deleteDTO';
+import { DeleteDTO } from '../types/file/IDeleteDTO';
 import * as fs from 'fs-extra';
-import { UserDTO } from '../dto/userDTO';
-import { ReadFileDTO } from '../dto/readFileDTO';
-import { ReadFileDownload } from '../dto/readFileDownload';
+import { UserDTO } from '../types/user/IUserDTO';
+import { ReadFileDTO } from '../types/file/IReadFileDTO';
+import { ReadFileDownloadDTO } from '../types/file/IReadFileDownload';
 import { join } from 'node:path';
 import { createReadStream } from 'fs';
 import { Response } from 'express';
 import * as process from 'node:process';
 import { Methods } from '../utils/methods';
 import { compare } from 'bcrypt';
+import { IReceivingDataFileDTO } from 'types/file/IReceivingDataFileDTO';
+import { File } from 'utils/File/File';
+import { General } from 'utils/general';
+import { ICreatingFileDTO } from 'types/file/ICreatingFileDTO';
+import { IGetAllFileDbDTO } from 'types/file/IGetAllFileDbDTO';
+import { IExposedFileDTO } from 'types/file/IExposeFileDTO';
+const prisma = new PrismaClient();
 
 @Injectable()
 export class AppService {
