@@ -14,8 +14,8 @@ export type User = {
 export class UsersService {
   private prisma = new PrismaClient();
 
-  async findOne(signInDto: AuthUserDTO): Promise<User | undefined> {
-    console.log("findone",signInDto)
+  async findOne(signInDto: IAuthUserDTO): Promise<User | undefined> {
+  
     return this.prisma.user.findUnique({
       where: {
         name: signInDto.name
