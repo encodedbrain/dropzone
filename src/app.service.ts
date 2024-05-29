@@ -8,7 +8,6 @@ import { ReadFileDTO } from '../types/file/IReadFileDTO';
 import { ReadFileDownloadDTO } from '../types/file/IReadFileDownload';
 import { join } from 'node:path';
 import * as process from 'node:process';
-import { Methods } from '../utils/methods';
 import { compare } from 'bcrypt';
 import { IReceivingDataFileDTO } from 'types/file/IReceivingDataFileDTO';
 import { File } from 'utils/File/File';
@@ -21,13 +20,11 @@ const prisma = new PrismaClient();
 @Injectable()
 export class AppService {
 
-
   UploadMessage(text: string): string {
     return text
   }
 
   async GetFileDb(User: ReadFileDTO): Promise<any> {
-    const prisma = new PrismaClient();
 
     const user = await prisma.user.findUnique({ where: { email: User.email } })
 
@@ -79,30 +76,9 @@ export class AppService {
 
     if (!user) return "operation failed: user does not exist"
 
-    const encodedPassword = await compare(User.password, user.password);
 
     return File.handleDownload({ filename, response });
 
-    const folder = "./files";
-
-    fs.readdir(folder, (err, files) => {
-      if (err) return `error when searching for file: ${err}`
-      files.forEach(file => {
-        const pathComplete = `${folder}/${file}`;
-        fs.stat(pathComplete, (err, statistics) => {
-          if (err) return `error getting file information: ${err}`;
-          if (statistics.isFile()) {
-            if (pathComplete.length < 1) return "operation failed: file does not exist"
-          }
-        });
-      });
-    });
-    const file = createReadStream(join(process.cwd(), `files/${User.filename}`))
-    res.set({
-      'Content-Type': 'image/*',
-      'Content-Disposition': `attachment; filename="${User.filename}"`,
-    });
-    return new StreamableFile(file);
   }
 
   async ExposeFile(credentials: IExposedFileDTO): Promise<any> {
