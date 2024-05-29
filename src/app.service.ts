@@ -113,7 +113,7 @@ export class AppService {
 
   async CreateFileUserDb(credentials: IReceivingDataFileDTO): Promise<string> {
 
-  async CreateFileUserDb(File: Express.Multer.File, email: string, password: string, @Res() res: Response): Promise<any> {
+    const { email, file, response } = credentials
 
     const prisma = new PrismaClient();
 
