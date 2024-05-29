@@ -10,12 +10,13 @@ import {
 } from '@nestjs/common';
 import { AppService } from "./app.service";
 import { diskStorage } from "multer";
-import { DeleteDTO } from "../dto/deleteDTO";
+import { DeleteDTO } from "../types/file/IDeleteDTO";
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ReadFileDTO } from '../dto/readFileDTO';
+import { ReadFileDTO } from '../types/file/IReadFileDTO';
 import { GuardGuard } from './guard/guard.guard';
 import e, { Response } from 'express';
-import { Methods } from '../utils/methods';
+import { General } from '../utils/general';
+
 
 
 @Controller("v1")
