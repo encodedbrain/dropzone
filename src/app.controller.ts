@@ -5,6 +5,7 @@ import {
   Delete,
   Get, Headers, Param,
   Post, Res,
+  StreamableFile,
   UploadedFile, UseGuards, UseInterceptors,
 } from '@nestjs/common';
 import { AppService } from "./app.service";
