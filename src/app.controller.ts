@@ -50,8 +50,8 @@ export class AppController {
   }
 
   @Get("user/file/:filename")
-  async handleGetFile(@Param("filename") filename: string, @Res() res: any): Promise<any> {
-    return await this.appService.ExposeFile(filename, res).then(response => response).catch(error => error);
+  async handleGetFile(@Param("filename") filename: string, @Res() response: any): Promise<any> {
+    return await this.appService.ExposeFile({ filename, response }).then(response => response).catch(error => error);
   }
 
   @Post("user/file/upload"
@@ -67,7 +67,8 @@ export class AppController {
       }
     })
   }))
-  async handleCreateFile(@UploadedFile() file: Express.Multer.File, @Headers("Email") Email: string, @Headers("Password") Password: string, @Res() response: Response): Promise<any> {
+  async handleCreateFile(@UploadedFile() file: Express.Multer.File, @Headers("email") email: string, @Res() response: Response): Promise<string> {
+
     if (!file) return "operation failed: something is missing here";
 
     return await this.appService.CreateFileUserDb(file, Email, Password, response).then(response => response).catch(error => error);
