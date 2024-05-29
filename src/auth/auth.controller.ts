@@ -16,7 +16,7 @@ export class AuthController {
 
 
   @Post('signup')
-  async handleCreateNewUser(@Body() User: CreateUserDTO): Promise<any> {
+  async handleCreateNewUser(@Body() User: ICreateUserDTO): Promise<any> {
     if (!User.password || !User.email || !User.name) return "operation failed: something missing here"
     return await this.authService.signUp(User).then(response => response).catch(error => error);
   }
