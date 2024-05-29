@@ -107,10 +107,11 @@ export class AppService {
     return new StreamableFile(file);
   }
 
-  async ExposeFile(filename: string, @Res() res: Response): Promise<any> {
-    return res.sendFile(join(process.cwd(), './files/' + filename));
+  async ExposeFile(credentials: IExposedFileDTO): Promise<any> {
+    return credentials.response.sendFile(join(process.cwd(), './files/' + credentials.filename));
   }
 
+  async CreateFileUserDb(credentials: IReceivingDataFileDTO): Promise<string> {
 
   async CreateFileUserDb(File: Express.Multer.File, email: string, password: string, @Res() res: Response): Promise<any> {
 
