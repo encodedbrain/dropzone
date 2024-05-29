@@ -139,9 +139,7 @@ export class AppService {
 
   }
 
-  async DeleteUploadFileDb(file: DeleteDTO, User: UserDTO): Promise<any> {
-
-    const prisma = new PrismaClient();
+  async DeleteUploadFileDb(file: DeleteDTO, User: UserDTO): Promise<string> {
 
     const user = await prisma.user.findUnique({ where: { email: User.email } })
 
