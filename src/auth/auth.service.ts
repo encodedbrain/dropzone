@@ -14,7 +14,7 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
   ) { }
-  async signIn(signInDto: AuthUserDTO): Promise<any> {
+  async signIn(signInDto: IAuthUserDTO): Promise<any> {
 
     const user = await this.usersService.findOne(signInDto);
 
@@ -36,7 +36,7 @@ export class AuthService {
     };
   }
 
-  async signUp(User: CreateUserDTO): Promise<any> {
+  async signUp(User: ICreateUserDTO): Promise<any> {
     const prisma = new PrismaClient();
     const rgxEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const rgxName = /^[a-zA-Z\s]+$/;
