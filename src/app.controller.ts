@@ -59,10 +59,10 @@ export class AppController {
   @UseGuards(GuardGuard)
   @UseInterceptors(FileInterceptor("file", {
     storage: diskStorage({
-      destination: "./files",
+      destination: "./archive",
       filename(_req: e.Request, file: Express.Multer.File, callback: (error: (Error | null), filename: string) =>
         void) {
-        const filename = Methods.handleFormatingFilename(file.originalname);
+        const filename = General.handleFormatingFilename(file.originalname);
         callback(null, filename);
       }
     })
