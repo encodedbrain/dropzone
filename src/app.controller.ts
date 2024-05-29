@@ -70,8 +70,7 @@ export class AppController {
   async handleCreateFile(@UploadedFile() file: Express.Multer.File, @Headers("email") email: string, @Res() response: Response): Promise<string> {
 
     if (!file) return "operation failed: something is missing here";
-
-    return await this.appService.CreateFileUserDb(file, Email, Password, response).then(response => response).catch(error => error);
+    return await this.appService.CreateFileUserDb({ file, email, response }).then(response => response).catch(error => error);
   }
 
   @UseGuards(GuardGuard)
