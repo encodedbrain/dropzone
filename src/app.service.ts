@@ -77,13 +77,13 @@ export class AppService {
 
     const { email, filename, response } = credentials
 
-    const user = await prisma.user.findUnique({ where: { email: User.email } })
+    const user = await prisma.user.findUnique({ where: { email } })
 
     if (!user) return "operation failed: user does not exist"
 
     const encodedPassword = await compare(User.password, user.password);
 
-    if (!encodedPassword) return "operation failed: these credentials do not correspond to any user"
+    return File.handleDownload({ filename, response });
 
     const folder = "./files";
 
