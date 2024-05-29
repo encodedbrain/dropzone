@@ -1,8 +1,8 @@
 /* eslint-disable prettier/prettier */
 import { Body, Controller, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { AuthUserDTO } from '../../dto/authUserDTO';
-import { CreateUserDTO } from 'dto/createUserDTO';
+import { IAuthUserDTO } from '../../types/user/IAuthUserDTO';
+import { ICreateUserDTO } from 'types/user/ICreateUserDTO';
 
 
 @Controller('v1')
