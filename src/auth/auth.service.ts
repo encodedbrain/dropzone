@@ -3,8 +3,8 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { compare, hash } from 'bcrypt';
-import { AuthUserDTO } from 'dto/authUserDTO';
-import { CreateUserDTO } from 'dto/createUserDTO';
+import { IAuthUserDTO } from 'types/user/IAuthUserDTO';
+import { ICreateUserDTO } from 'types/user/ICreateUserDTO';
 import { PrismaClient } from '@prisma/client';
 
 
