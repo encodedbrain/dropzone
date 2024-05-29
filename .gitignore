@@ -3,7 +3,8 @@
 /node_modules
 /build
 *migrations
-files
+archive
+.fleet
 # Logs
 logs
 *.log
