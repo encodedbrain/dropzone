@@ -75,7 +75,7 @@ export class AppService {
 
   async DownloadFile(credentials: ReadFileDownloadDTO): Promise<StreamableFile | string> {
 
-    const prisma = new PrismaClient();
+    const { email, filename, response } = credentials
 
     const user = await prisma.user.findUnique({ where: { email: User.email } })
 
