@@ -23,9 +23,9 @@ export class AuthController {
   }
 
   @Post('send/email')
-  async handleSendEmail(@Body() email: string, @Res() response: Response): Promise<string> {
+  async handleSendEmail(@Body() email: string): Promise<string | any> {
     if (!email) return "operation failed: something missing here"
-    return await this.authService.generateEmail(email, response).then(response => response).catch(error => console.error(error));
+    return await this.authService.generateEmail({ email }).then(response => response).catch(error => console.error(error));
   }
 
   @Get("forgot-password/:token")

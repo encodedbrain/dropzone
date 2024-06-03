@@ -14,7 +14,8 @@ import { IEncodedDTO } from 'types/jwt/IEncodedDTO';
 import { IChangingPasswordDTO } from 'types/user/IChangingPasswordDTO';
 import { Bcrypt } from 'utils/Bcrypt/Encrypt';
 import { createTransport } from 'nodemailer';
-import { Response } from 'express';
+// import { Response } from 'express';
+import { ISendEmailDTO } from 'types/user/ISendEmailDTO';
 const prisma = new PrismaClient()
 
 @Injectable()
@@ -81,31 +82,27 @@ export class AuthService {
     return "user created successfully";
   }
 
-  async generateEmail(email:string , response: Response): Promise<string | any> {
+  async generateEmail(credential: ISendEmailDTO): Promise<string> {
 
-    const prisma = new PrismaClient()
+    const { email } = Object(credential.email)
 
     if (!email) return
-
-    console.log("email", email)
 
     const user = await prisma.user.findUnique({
       where: {
         email
       }
     })
-    console.log("user", user)
 
     if (!user) return "operation failed: this user already exists"
-
 
     const payload = { id: user.id, email: user.email }
 
     const token = await GenerateToken({ payload, jwt: this.jwtService })
 
-    const host = `http://localhost:8000/v1/forgot-password/${token}`
-
-    // const result = await HandleSendRecoveryPassword({ name: user.name, email: credential.email, content: host });
+    // const host = `http://localhost:8000/v1/forgot-password/${token}`
+    const host = `http://localhost:3000/v1/${token}`
+    
 
     const transporter = createTransport({
       service: "outlook",
@@ -123,7 +120,7 @@ export class AuthService {
       html: `<a href=${host} target="_blank">forgot password</a>`,
     })
 
-    return response.status(200).send("email sent, check your email to change password")
+    return "email sent, check your email to change password"
 
   }
 
