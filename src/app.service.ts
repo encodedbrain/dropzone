@@ -71,13 +71,15 @@ export class AppService {
   async DownloadFile(credentials: ReadFileDownloadDTO): Promise<StreamableFile | string> {
 
     const { email, filename, response } = credentials
-
+    
     const user = await prisma.user.findUnique({ where: { email } })
 
     if (!user) return "operation failed: user does not exist"
 
 
     return File.handleDownload({ filename, response });
+
+  
 
   }
 

@@ -1,20 +1,17 @@
 /* eslint-disable prettier/prettier */
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Res, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { compare } from 'bcrypt';
 import { IAuthUserDTO } from 'types/user/IAuthUserDTO';
 import { ICreateUserDTO } from 'types/user/ICreateUserDTO';
 import { PrismaClient } from '@prisma/client';
-// import { ISendEmailDTO } from 'types/user/ISendEmailDTO';
-// import { HandleSendRecoveryPassword } from 'config/mailer';
 import { GenerateToken } from 'service/jwt/jwt';
 import { IForgotPasswordDTO } from 'types/user/IForgotPasswordDTO';
 import { IEncodedDTO } from 'types/jwt/IEncodedDTO';
 import { IChangingPasswordDTO } from 'types/user/IChangingPasswordDTO';
 import { Bcrypt } from 'utils/Bcrypt/Encrypt';
 import { createTransport } from 'nodemailer';
-// import { Response } from 'express';
 import { ISendEmailDTO } from 'types/user/ISendEmailDTO';
 const prisma = new PrismaClient()
 
@@ -100,9 +97,8 @@ export class AuthService {
 
     const token = await GenerateToken({ payload, jwt: this.jwtService })
 
-    // const host = `http://localhost:8000/v1/forgot-password/${token}`
     const host = `http://localhost:3000/v1/${token}`
-    
+
 
     const transporter = createTransport({
       service: "outlook",
@@ -124,10 +120,10 @@ export class AuthService {
 
   }
 
-  async forgotPassword(credential: IForgotPasswordDTO): Promise<boolean> {
+  async forgotPassword(credential: IForgotPasswordDTO): Promise<any> {
     const encoded: IEncodedDTO = await this.jwtService.verifyAsync(credential.token)
 
-    if (!encoded) return false
+    if (!encoded) return credential.res.status(400).json({ token: false })
 
     const user = await prisma.user.findUnique({
       where: {
@@ -137,21 +133,27 @@ export class AuthService {
 
     if (!user) return false
 
-    return true
+    return credential.res.status(200).json({ token: true })
 
   }
   async changePassword(credential: IChangingPasswordDTO): Promise<string | any> {
 
+    const { name } = Object(credential.name)
+    const { password } = Object(credential.password)
+    const { newPassword } = Object(credential.newPassword)
+
+    console.log(name)
+    console.log(credential.name)
     const user = await prisma.user.findUnique({
       where: {
-        name: credential.name
+        name: name
       }
     })
 
     if (!user) return "user not found in our database"
 
-    const passwordMatch = await compare(credential.password, user.password);
-
+    const passwordMatch = await compare(password, user.password);
+    console.log(passwordMatch)
     if (!passwordMatch) return "invalid user credentials"
 
     await prisma.user.update({
@@ -159,7 +161,7 @@ export class AuthService {
         id: user.id
       },
       data: {
-        password: await Bcrypt.EncryptPassword(credential.newPassword)
+        password: await Bcrypt.EncryptPassword(newPassword)
       }
     })
 

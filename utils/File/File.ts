@@ -61,7 +61,7 @@ export const File = {
         }
 
         const file = createReadStream(folder)
-
+  
         credentials.response.set({
             'Content-Type': 'image/*',
             'Content-Disposition': `attachment; filename="${credentials.filename}"`,
