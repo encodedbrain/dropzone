@@ -29,9 +29,9 @@ export class AuthController {
   }
 
   @Get("forgot-password/:token")
-  async handleForgotPassword(@Param("token") token: string): Promise<boolean> {
+  async handleForgotPassword(@Param("token") token: string, @Res() res: Response): Promise<boolean> {
     if (!token) return false
-    return await this.authService.forgotPassword({ token })
+    return await this.authService.forgotPassword({ token, res })
   }
 
   @Post("change/password")
