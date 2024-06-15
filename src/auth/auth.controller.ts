@@ -1,19 +1,16 @@
 /* eslint-disable prettier/prettier */
 import { Body, Controller, Get, Param, Post, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { IAuthUserDTO } from '../../types/user/IAuthUserDTO';
-import { ICreateUserDTO } from 'types/user/ICreateUserDTO';
+import { IAuthUserDTO, ICreateUserDTO } from "../../types/global/global"
 import { Response } from 'express';
-
-
 
 @Controller('v1')
 export class AuthController {
   constructor(private readonly authService: AuthService) { }
   @Post('signin')
-  async signIn(@Body() credential: IAuthUserDTO): Promise<string | any> {
+  async signIn(@Body() credential: IAuthUserDTO, @Res() response: Response): Promise<string | any> {
     if (!credential.name || !credential.password) return "operation failed: something missing here"
-    return await this.authService.signIn(credential);
+    return await this.authService.signIn(credential, response);
   }
 
   @Post('signup')
@@ -23,9 +20,9 @@ export class AuthController {
   }
 
   @Post('send/email')
-  async handleSendEmail(@Body() email: string): Promise<string | any> {
+  async handleSendEmail(@Body() email: string, @Res() response: Response): Promise<string | any> {
     if (!email) return "operation failed: something missing here"
-    return await this.authService.generateEmail({ email }).then(response => response).catch(error => console.error(error));
+    return await this.authService.generateEmail(email, response).then(response => response).catch(error => console.error(error));
   }
 
   @Get("forgot-password/:token")
@@ -39,5 +36,4 @@ export class AuthController {
     if (!password || !newPassword) return "operation failed: something missing here"
     return await this.authService.changePassword({ name, password, newPassword, response });
   }
-
 }

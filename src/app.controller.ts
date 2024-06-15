@@ -10,12 +10,11 @@ import {
 } from '@nestjs/common';
 import { AppService } from "./app.service";
 import { diskStorage } from "multer";
-import { DeleteDTO } from "../types/file/IDeleteDTO";
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ReadFileDTO } from '../types/file/IReadFileDTO';
 import { GuardGuard } from './guard/guard.guard';
 import e, { Response } from 'express';
 import { General } from '../utils/general';
+import { IReadFileDTO, IDeleteDTO } from "../types/global/global"
 
 
 
@@ -31,14 +30,14 @@ export class AppController {
 
   @UseGuards(GuardGuard)
   @Get("user/file/read")
-  async handleGetFileDb(@Body() user: ReadFileDTO): Promise<any> {
+  async handleGetFileDb(@Body() user: IReadFileDTO): Promise<any> {
     if (!user.name || !user.email || !user.password) return "operation failed: There's something missing here"
     return this.appService.GetFileDb(user).then(response => response).catch(error => error);
   }
 
   @UseGuards(GuardGuard)
   @Get("user/file/all")
-  async handleGetAllFiles(@Body() user: ReadFileDTO): Promise<any> {
+  async handleGetAllFiles(@Body() user: IReadFileDTO): Promise<any> {
     if (!user) return "operation failed: There's something missing here"
     return this.appService.GetAllFileDb(user).then(response => response).catch(error => error);
   }
@@ -75,7 +74,7 @@ export class AppController {
 
   @UseGuards(GuardGuard)
   @Delete("user/file/delete")
-  async handleDeleteFile(@Body() file: DeleteDTO, @Headers("email") email: string, @Headers("password") password: string): Promise<any> {
+  async handleDeleteFile(@Body() file: IDeleteDTO, @Headers("email") email: string, @Headers("password") password: string): Promise<any> {
 
     if (!file.name || !email || !password) return "operation failed: the name for the file was not provided"
 
