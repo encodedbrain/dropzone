@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-export class IAuthUserDTO {
+export interface IAuthUserDTO {
   name: string;
   password: string;
 }

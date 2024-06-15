@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-export class ReadFileDTO {
+export interface IReadFileDTO {
   name: string;
   email: string;
   password: string;

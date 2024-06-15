@@ -1,3 +1,3 @@
-export class DeleteDTO {
+export interface IDeleteDTO {
   name: string;
 }

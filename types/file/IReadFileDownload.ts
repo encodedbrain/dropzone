@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-export class ReadFileDownloadDTO {
+export interface IReadFileDownloadDTO {
   filename: string;
   email: string;
   response: Response | any
