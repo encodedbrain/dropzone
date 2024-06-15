@@ -12,7 +12,7 @@ import * as jwt from 'jsonwebtoken';
 
 @Injectable()
 export class GuardGuard implements CanActivate {
-  constructor(private jwtService: JwtService) {}
+  constructor(private jwtService: JwtService) { }
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
@@ -48,7 +48,7 @@ export class GuardGuard implements CanActivate {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       jwt.verify(token, process.env.SECRET);
       return false;
-    } catch (err) {
+    } catch (err: any) {
       if (err.name === 'TokenExpiredError') {
         return true;
       } else {
