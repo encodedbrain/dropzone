@@ -1,18 +1,15 @@
 /* eslint-disable prettier/prettier */
-import { Injectable, Res, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Res } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { compare } from 'bcrypt';
-import { IAuthUserDTO } from 'types/user/IAuthUserDTO';
-import { ICreateUserDTO } from 'types/user/ICreateUserDTO';
 import { PrismaClient } from '@prisma/client';
 import { GenerateToken } from 'service/jwt/jwt';
-import { IForgotPasswordDTO } from 'types/user/IForgotPasswordDTO';
-import { IEncodedDTO } from 'types/jwt/IEncodedDTO';
-import { IChangingPasswordDTO } from 'types/user/IChangingPasswordDTO';
 import { Bcrypt } from 'utils/Bcrypt/Encrypt';
-import { createTransport } from 'nodemailer';
-import { ISendEmailDTO } from 'types/user/ISendEmailDTO';
+import { Response } from 'express';
+import { EmailService } from './../email/email.service';
+import { IAuthUserDTO, ICreateUserDTO, IForgotPasswordDTO, IEncodedDTO, IChangingPasswordDTO } from "../../types/global/global"
+
 const prisma = new PrismaClient()
 
 @Injectable()
@@ -20,27 +17,30 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
+    private emailService: EmailService
   ) { }
-  async signIn(credential: IAuthUserDTO): Promise<any> {
+  async signIn(credential: IAuthUserDTO, @Res() response: Response): Promise<any> {
 
     const user = await this.usersService.findOne(credential);
 
-    if (!user) throw new UnauthorizedException();
+    if (!user) return response.status(400);
 
     if (!(await compare(String(credential.password), String(user?.password)))) {
-      throw new UnauthorizedException();
+      return response.status(401).send("unauthorized")
     }
 
     const payload = { sub: user.id, username: user.name };
 
     user.password = '';
 
-    return {
+    const data = {
       id: user.id,
       name: user.name,
       email: user.email,
       token: await GenerateToken({ payload, jwt: this.jwtService })
-    };
+    }
+
+    return response.status(200).json(data)
   }
 
   async signUp(credential: ICreateUserDTO): Promise<any> {
@@ -79,9 +79,9 @@ export class AuthService {
     return "user created successfully";
   }
 
-  async generateEmail(credential: ISendEmailDTO): Promise<string> {
+  async generateEmail(credential: string, @Res() response: Response): Promise<any> {
 
-    const { email } = Object(credential.email)
+    const { email } = Object(credential)
 
     if (!email) return
 
@@ -99,24 +99,9 @@ export class AuthService {
 
     const host = `http://localhost:3000/v1/${token}`
 
+    await this.emailService.sendEmail({ name: user.name, email: user.email, token: host });
 
-    const transporter = createTransport({
-      service: "outlook",
-      auth: {
-        user: process.env.MAILER_EMAIL,
-        pass: process.env.MAILER_PASSWORD
-      }
-    })
-
-    await transporter.sendMail({
-      from: `olá ${user.name} <marcodamasceno0101@outlook.com>`,
-      to: user.email,
-      subject: "Hello ✔",
-      text: "click on the link to update your password",
-      html: `<a href=${host} target="_blank">forgot password</a>`,
-    })
-
-    return "email sent, check your email to change password"
+    return response.status(200).json({ message: "email sent, check your email to change password" })
 
   }
 
@@ -133,7 +118,7 @@ export class AuthService {
 
     if (!user) return false
 
-    return credential.res.status(200).json({ token: true })
+    return credential.res.status(200).send("redirecting authenticated user")
 
   }
   async changePassword(credential: IChangingPasswordDTO): Promise<string | any> {
@@ -142,19 +127,17 @@ export class AuthService {
     const { password } = Object(credential.password)
     const { newPassword } = Object(credential.newPassword)
 
-    console.log(name)
-    console.log(credential.name)
     const user = await prisma.user.findUnique({
       where: {
         name: name
       }
     })
 
-    if (!user) return "user not found in our database"
+    if (!user) return credential.response.status(400).send("user not found in our database")
 
     const passwordMatch = await compare(password, user.password);
-    console.log(passwordMatch)
-    if (!passwordMatch) return "invalid user credentials"
+
+    if (!passwordMatch) return credential.response.status(400).send("invalid user credentials")
 
     await prisma.user.update({
       where: {

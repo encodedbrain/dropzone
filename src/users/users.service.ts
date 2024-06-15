@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { Injectable } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
-import { IAuthUserDTO } from 'types/user/IAuthUserDTO';
+import { IAuthUserDTO } from 'types/global/global'
 
 export type User = {
   id: number;
@@ -15,7 +15,7 @@ export class UsersService {
   private prisma = new PrismaClient();
 
   async findOne(signInDto: IAuthUserDTO): Promise<User | undefined> {
-  
+
     return this.prisma.user.findUnique({
       where: {
         name: signInDto.name

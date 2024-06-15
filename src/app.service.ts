@@ -1,20 +1,23 @@
 /* eslint-disable prettier/prettier */
-import { Injectable, StreamableFile } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
-import { DeleteDTO } from '../types/file/IDeleteDTO';
 import * as fs from 'fs-extra';
-import { UserDTO } from '../types/user/IUserDTO';
-import { ReadFileDTO } from '../types/file/IReadFileDTO';
-import { ReadFileDownloadDTO } from '../types/file/IReadFileDownload';
-import { join } from 'node:path';
 import * as process from 'node:process';
+import { Injectable, StreamableFile } from '@nestjs/common';
+import { join } from 'node:path';
 import { compare } from 'bcrypt';
-import { IReceivingDataFileDTO } from 'types/file/IReceivingDataFileDTO';
 import { File } from 'utils/File/File';
 import { General } from 'utils/general';
-import { ICreatingFileDTO } from 'types/file/ICreatingFileDTO';
-import { IGetAllFileDbDTO } from 'types/file/IGetAllFileDbDTO';
-import { IExposedFileDTO } from 'types/file/IExposeFileDTO';
+import { PrismaClient } from '@prisma/client';
+import { 
+  IReadFileDTO,
+  ICreatingFileDTO,
+  IUserDTO,
+  IDeleteDTO,
+  IReceivingDataFileDTO,
+  IExposedFileDTO,
+  IGetAllFileDbDTO,
+  IReadFileDownloadDTO } from 'types/global/global';
+
+
 const prisma = new PrismaClient();
 
 @Injectable()
@@ -24,7 +27,9 @@ export class AppService {
     return text
   }
 
-  async GetFileDb(User: ReadFileDTO): Promise<any> {
+
+  async GetFileDb(User: IReadFileDTO
+  ): Promise<any> {
 
     const user = await prisma.user.findUnique({ where: { email: User.email } })
 
@@ -49,7 +54,7 @@ export class AppService {
     return fileExists
   }
 
-  async GetAllFileDb(User: ReadFileDTO): Promise<IGetAllFileDbDTO[] | string> {
+  async GetAllFileDb(User: IReadFileDTO): Promise<IGetAllFileDbDTO[] | string> {
 
     const user = await prisma.user.findUnique({ where: { email: User.email } })
 
@@ -68,10 +73,10 @@ export class AppService {
     return fileExists;
   }
 
-  async DownloadFile(credentials: ReadFileDownloadDTO): Promise<StreamableFile | string> {
+  async DownloadFile(credentials: IReadFileDownloadDTO): Promise<StreamableFile | string> {
 
     const { email, filename, response } = credentials
-    
+
     const user = await prisma.user.findUnique({ where: { email } })
 
     if (!user) return "operation failed: user does not exist"
@@ -79,7 +84,7 @@ export class AppService {
 
     return File.handleDownload({ filename, response });
 
-  
+
 
   }
 
@@ -117,7 +122,7 @@ export class AppService {
 
   }
 
-  async DeleteUploadFileDb(file: DeleteDTO, User: UserDTO): Promise<string> {
+  async DeleteUploadFileDb(file: IDeleteDTO, User: IUserDTO): Promise<string> {
 
     const user = await prisma.user.findUnique({ where: { email: User.email } })
 
@@ -141,7 +146,7 @@ export class AppService {
     return `operation completed successfully`
   }
 
-  async DeleteUploadFileLocal(file: DeleteDTO): Promise<string> {
+  async DeleteUploadFileLocal(file: IDeleteDTO): Promise<string> {
 
     const folder = "files";
     const filePath = `${folder}/${file.name}`;
