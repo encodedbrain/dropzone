@@ -4,7 +4,6 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import * as process from 'process';
 import * as express from 'express';
-import { join } from 'path';
 
 const port = process.env.PORT || 3000;
 async function bootstrap() {
