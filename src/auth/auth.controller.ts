@@ -1,39 +1,61 @@
 /* eslint-disable prettier/prettier */
 import { Body, Controller, Get, Param, Post, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { IAuthUserDTO, ICreateUserDTO } from "../../types/global/global"
+import {
+  IAuthUserDTO,
+  ICreateUserRouteParameterDTO,
+  IChangingPasswordRoutePasswordDTO,
+  ISendEmailRouteParameterDTO,
+  IDataAuthUserDTO
+} from "../../types/global/global"
 import { Response } from 'express';
 
 @Controller('v1')
 export class AuthController {
   constructor(private readonly authService: AuthService) { }
   @Post('signin')
-  async signIn(@Body() credential: IAuthUserDTO, @Res() response: Response): Promise<string | any> {
-    if (!credential.name || !credential.password) return "operation failed: something missing here"
-    return await this.authService.signIn(credential, response);
+  async signIn(@Body() Parameter: IAuthUserDTO, @Res() response: Response): Promise<IDataAuthUserDTO | Response<string>> {
+    if (!Parameter.name || !Parameter.password) return response.status(400).send("operation failed: something missing here")
+    const credentials = { name: Parameter.name, password: Parameter.password }
+    return await this.authService.signIn(credentials, response)
   }
 
   @Post('signup')
-  async handleCreateNewUser(@Body() credential: ICreateUserDTO): Promise<string | any> {
-    if (!credential.password || !credential.email || !credential.name) return "operation failed: something missing here"
-    return await this.authService.signUp(credential).then(response => response).catch(error => error);
+  async handleCreateNewUser(@Body() parameter: ICreateUserRouteParameterDTO, @Res() response: Response): Promise<Response> {
+
+    if (!parameter.password || !parameter.email || !parameter.name) return response.status(400).send("operation failed: something missing here")
+
+    const credentials = { name: parameter.name, password: parameter.password, email: parameter.email }
+
+    return await this.authService.signUp(credentials, response).then(response => response).catch(error => error)
   }
 
   @Post('send/email')
-  async handleSendEmail(@Body() email: string, @Res() response: Response): Promise<string | any> {
-    if (!email) return "operation failed: something missing here"
-    return await this.authService.generateEmail(email, response).then(response => response).catch(error => console.error(error));
+  async handleSendEmail(@Body() parameter: ISendEmailRouteParameterDTO, @Res() response: Response): Promise<Response<string> | void> {
+    if (!parameter.email) return response.status(400).send("operation failed: something missing here")
+
+    const credentials = { email: parameter.email, response }
+
+    return await this.authService.generateEmail(credentials, response).then(response => response).catch(error => error)
   }
 
   @Get("forgot-password/:token")
-  async handleForgotPassword(@Param("token") token: string, @Res() res: Response): Promise<boolean> {
-    if (!token) return false
-    return await this.authService.forgotPassword({ token, res })
+  async handleForgotPassword(@Param("token") parameter: string, @Res() response: Response): Promise<Response<boolean | any>> {
+
+    if (!parameter) return response.status(400).send("credential invalid")
+
+    const credentials = { token: parameter, response }
+
+    return await this.authService.forgotPassword(credentials, response)
   }
 
   @Post("change/password")
-  async handleChangePassword(@Body() name: string, @Body() password: string, @Body() newPassword: string, @Res() response: Response): Promise<any> {
-    if (!password || !newPassword) return "operation failed: something missing here"
-    return await this.authService.changePassword({ name, password, newPassword, response });
+  async handleChangePassword(@Body() parameter: IChangingPasswordRoutePasswordDTO, @Res() response: Response): Promise<Response> {
+
+    if (!parameter.password || !parameter.newPassword) return response.status(400).send("operation failed: something missing here")
+
+    const credentials = { name: parameter.name, password: parameter.password, newPassword: parameter.newPassword, response }
+
+    return await this.authService.changePassword(credentials, response);
   }
 }
