@@ -9,11 +9,12 @@ datasource db {
 }
 
 model File {
-  id       Int    @id @default(autoincrement())
-  File     String
-  Date     String
-  Size     Int
-  Time     String
+  id         Int      @id @default(autoincrement())
+  name       String
+  path       String
+  size       Int
+  mimeType   String 
+  createdAt  DateTime @default(now())
   authorId Int
   author   User   @relation(fields: [authorId], references: [id])
 }
