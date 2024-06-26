@@ -1,21 +1,23 @@
 /* eslint-disable prettier/prettier */
 import * as fs from 'fs-extra';
 import * as process from 'node:process';
-import { Injectable, StreamableFile } from '@nestjs/common';
+import { Injectable, Res, StreamableFile } from '@nestjs/common';
 import { join } from 'node:path';
 import { compare } from 'bcrypt';
 import { File } from 'utils/File/File';
 import { General } from 'utils/general';
 import { PrismaClient } from '@prisma/client';
-import { 
-  IReadFileDTO,
-  ICreatingFileDTO,
-  IUserDTO,
-  IDeleteDTO,
+import { Response, response } from "express"
+import {
   IReceivingDataFileDTO,
   IExposedFileDTO,
-  IGetAllFileDbDTO,
-  IReadFileDownloadDTO } from 'types/global/global';
+  IReadFileDownloadDTO,
+  IReadFileDTO,
+  IGetAllFileDTO,
+  IDeleteUploadFileDbDTO
+} from 'types/global/global';
+import { Service } from 'utils/service/service';
+import { IDeleteUploadFileLocalDTO } from 'types/file/DeleteUploadFileLocalDTO';
 
 
 const prisma = new PrismaClient();
@@ -23,46 +25,56 @@ const prisma = new PrismaClient();
 @Injectable()
 export class AppService {
 
-  UploadMessage(text: string): string {
-    return text
+  UploadMessage(credentials: string, @Res() response: Response): Response {
+    return response.status(200).send(credentials)
   }
 
 
-  async GetFileDb(User: IReadFileDTO
+  async GetFileDb(credentials: IReadFileDTO, @Res() response: Response
   ): Promise<any> {
 
-    const user = await prisma.user.findUnique({ where: { email: User.email } })
+    const { email, name, password } = credentials
 
-    if (!user) return "operation failed: user does not exist"
+    if (!Service.handleVerifyEmail(email) || !Service.handleVerifyNickname(name) || !Service.handleVerifyPassword(password))
+      return response.status(400).send("credentials invalid")
 
-    const encodedPassword = await compare((User.password), user.password);
+    const user = await prisma.user.findUnique({ where: { email } })
 
-    if (!encodedPassword) return "operation failed: these credentials do not correspond to any user"
+    if (!user) return response.status(400).send("operation failed: user does not exist")
+
+    const encodedPassword = await compare(password, user.password);
+
+    if (!encodedPassword) return response.status(400).send("operation failed: these credentials do not correspond to any user")
 
     const fileExists = await prisma.file.findFirst({
       where: {
         authorId: {
           equals: user.id
         },
-        File: {
-          equals: User.name,
+        name: {
+          equals: name,
         }
       }
     });
-    if (!fileExists) return "operation failed: file does not exist"
+    if (!fileExists) return response.status(400).send("operation failed: file does not exist")
 
-    return fileExists
+    return response.status(200).send(fileExists)
   }
 
-  async GetAllFileDb(User: IReadFileDTO): Promise<IGetAllFileDbDTO[] | string> {
+  async GetAllFileDb(credentials: IGetAllFileDTO, @Res() response: Response): Promise<Response> {
 
-    const user = await prisma.user.findUnique({ where: { email: User.email } })
+    const { email, name, password } = credentials
 
-    if (!user) return "operation failed: user does not exist"
+    if (!Service.handleVerifyEmail(email) || !Service.handleVerifyNickname(name) || !Service.handleVerifyPassword(password))
+      return response.status(400).send("credentials invalid")
 
-    const encodedPassword = await compare(User.password, user.password);
+    const user = await prisma.user.findUnique({ where: { email } })
 
-    if (!encodedPassword) return "operation failed: these credentials do not correspond to any user"
+    if (!user) return response.status(400).send("operation failed: user does not exist")
+
+    const encodedPassword = await compare(password, user.password);
+
+    if (!encodedPassword) return response.status(400).send("operation failed: these credentials do not correspond to any user")
 
     const fileExists = await prisma.file.findMany({
       where: {
@@ -70,98 +82,102 @@ export class AppService {
       }
     })
 
-    return fileExists;
+    return response.status(200).send(fileExists);
   }
 
-  async DownloadFile(credentials: IReadFileDownloadDTO): Promise<StreamableFile | string> {
+  async DownloadFile(credentials: IReadFileDownloadDTO, @Res() response: Response): Promise<StreamableFile | Response<string>> {
 
-    const { email, filename, response } = credentials
+    const { email, name } = credentials
+
+    if (!Service.handleVerifyEmail(email)) return response.status(400).send("credentials invalid")
 
     const user = await prisma.user.findUnique({ where: { email } })
 
-    if (!user) return "operation failed: user does not exist"
+    if (!user) return response.status(400).send("operation failed: user does not exist")
 
 
-    return File.handleDownload({ filename, response });
-
+    return File.handleDownload({ name, response });
 
 
   }
 
-  async ExposeFile(credentials: IExposedFileDTO): Promise<any> {
-    return credentials.response.sendFile(join(process.cwd(), './files/' + credentials.filename));
+  async ExposeFile(credentials: IExposedFileDTO, @Res() response: Response): Promise<Response<string> | void> {
+    return response.sendFile(join(process.cwd(), './files/' + credentials.name));
   }
 
-  async CreateFileUserDb(credentials: IReceivingDataFileDTO): Promise<string> {
+  async CreateFileUserDb(credentials: IReceivingDataFileDTO, @Res() response: Response): Promise<Response | string> {
 
-    const { email, file, response } = credentials
+    if (!credentials.file) return response.status(400).send("operation failed: something is missing here")
+
+    if (!Service.handleVerifyEmail(credentials.email)) return response.status(400).send("credentials invalid")
+
+    const user = Service.handleUserSearchViaEmail(credentials.email)
+
+    if (!user) return response.status(400).send("operation failed: user does not exist")
+
+    File.handleVerifyExtension({ originalname: credentials.file.originalname, response })
+
+    File.handleVerifyExists({ id: (await user).id, originalname: credentials.file.originalname, response })
+
+    if (!General.handleFormatingFilename(credentials.file.originalname)) return response.status(400).send("credentials invalid")
+
+    return await File.handleCreate({
+      name: credentials.file.originalname,
+      path: credentials.file.path,
+      size: credentials.file.size,
+      mimeType: credentials.file.mimetype,
+      response, email: (await user).email
+    })
+  }
+
+  async DeleteUploadFileDb(credentials: IDeleteUploadFileDbDTO, @Res() response: Response): Promise<Response> {
+
+    const { email, name, password
+    } = credentials
+
+    if (!Service.handleVerifyEmail(email) || !Service.handleVerifyPassword(password))
+      return response.status(400).send("credentials invalid")
 
     const user = await prisma.user.findUnique({ where: { email } })
 
-    if (!user) return credentials.response.status(400).send("operation failed: user does not exist")
+    if (!user) return response.status(400).send("operation failed: user does not exist")
 
-    const originalname = file.originalname
+    const encodedPassword = await compare(password, user.password);
 
-    File.handleVerifyExtension({ originalname, response })
-
-    File.handleVerifyExists({ id: user.id, originalname, response })
-
-    const filename = General.handleFormatingFilename(originalname);
-
-    if (!filename) return
-
-    const data: ICreatingFileDTO = {
-      email,
-      File: originalname,
-      Date: String(new Date()),
-      Time: String(new Date()),
-      Size: file.size,
-      response
-    }
-    File.handleCreate(data)
-
-  }
-
-  async DeleteUploadFileDb(file: IDeleteDTO, User: IUserDTO): Promise<string> {
-
-    const user = await prisma.user.findUnique({ where: { email: User.email } })
-
-    if (!user) return "operation failed: user does not exist"
-
-    const encodedPassword = await compare(User.password, user.password);
-
-    if (!encodedPassword) return "operation failed: these credentials do not correspond to any user"
+    if (!encodedPassword) return response.status(400).send("operation failed: these credentials do not correspond to any user")
 
     const { count } = await prisma.file.deleteMany({
       where: {
         authorId: {
           equals: user.id
         },
-        File: file.name
+        name: name
       }
     });
 
-    if (count < 1) return "operation failed: file no deleted";
+    if (count < 1) return response.status(400).send("operation failed: file no deleted")
 
-    return `operation completed successfully`
+    return response.status(200).send("operation completed successfully")
   }
 
-  async DeleteUploadFileLocal(file: IDeleteDTO): Promise<string> {
+  async DeleteUploadFileLocal(credentials: IDeleteUploadFileLocalDTO): Promise<Response> {
+
+    const { name } = credentials
 
     const folder = "files";
-    const filePath = `${folder}/${file.name}`;
+    const filePath = `${folder}/${name}`;
 
     try {
       const exist = await fs.pathExists(filePath);
       if (!exist) {
-        return `the file does ${filePath} not exist.`;
+        return response.status(400).send("the file does ${filePath} not exist.")
       }
 
       await fs.remove(filePath);
 
-      return `the file  ${filePath} was removed successfully.`;
+      return response.status(400).send("the file  ${filePath} was removed successfully.")
     } catch (error) {
-      return `an error occurred while removing the file ${filePath}: ${error}`;
+      return response.status(400).send("an error occurred while removing the file ${filePath}: ${error}")
     }
   }
 
