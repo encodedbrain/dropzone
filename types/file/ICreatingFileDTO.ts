@@ -1,9 +1,9 @@
 /* eslint-disable prettier/prettier */
 export interface ICreatingFileDTO {
-    email: string;
-    File: string;
-    Date: string;
-    Time: string;
-    Size: number;
+    name: string
+    email: string
+    path: string
+    size: number
+    mimeType: string
     response: Response | any
 }

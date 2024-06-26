@@ -8,6 +8,7 @@ import { NotFoundException, StreamableFile } from "@nestjs/common";
 import { IDownloadFileDTO } from "types/file/IDownloadFileDTO";
 import { IVerifyFileDTO } from "types/file/IVerifyFileDTO";
 import { IVerifyFileExtensionDTO } from "types/file/IVerifyFileExtensionDTO";
+
 const prisma = new PrismaClient()
 
 export const File = {
@@ -18,13 +19,11 @@ export const File = {
         if (!extension.includes(credentials.originalname.split(".")[1])) return credentials.response.status(400).send("operation failed: extension format not supported")
     },
     async handleVerifyExists(credentials: IVerifyFileDTO): Promise<string> {
+
         const fileExists = await prisma.file.findFirst({
             where: {
-                authorId: {
-                    equals: credentials.id
-                }, File: {
-                    equals: General.handleFormatingFilename(credentials.originalname)
-                }
+                authorId: credentials.id,
+                name: General.handleFormatingFilename(credentials.originalname)
             }
         })
 
@@ -32,19 +31,19 @@ export const File = {
     },
     async handleCreate(credentials: ICreatingFileDTO): Promise<string> {
 
-        const { email, Date, File, Size, Time, response } = credentials
+        const { mimeType, size, name, path, response } = credentials
 
         await prisma.user.update({
             where: {
-                email
+                email: credentials.email
             },
             data: {
                 file: {
                     create: {
-                        File,
-                        Date,
-                        Time,
-                        Size
+                        name,
+                        path,
+                        size,
+                        mimeType,
                     }
                 }
             }
@@ -53,18 +52,18 @@ export const File = {
         return response.status(201).send("operation completed: add new file");
     },
     handleDownload(credentials: IDownloadFileDTO): StreamableFile {
-
-        const folder = resolve("archive", credentials.filename);
+        console.log(credentials)
+        const folder = resolve("archive", credentials.name);
 
         if (!existsSync(folder)) {
             throw new NotFoundException('error when searching for file');
         }
 
         const file = createReadStream(folder)
-  
+
         credentials.response.set({
             'Content-Type': 'image/*',
-            'Content-Disposition': `attachment; filename="${credentials.filename}"`,
+            'Content-Disposition': `attachment; filename="${credentials.name}"`,
         });
         return new StreamableFile(file);
     }

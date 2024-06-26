@@ -1,5 +1,7 @@
 /* eslint-disable prettier/prettier */
 export interface IUserDTO {
-  email: string;
-  password: string;
+  id:number
+  name: string
+  email: string
+  password: string
 }

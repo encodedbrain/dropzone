@@ -2,6 +2,6 @@
 import { JwtService } from "@nestjs/jwt";
 
 export interface ITokenDTO {
-    payload: object,
+    payload: object
     jwt: JwtService
 }

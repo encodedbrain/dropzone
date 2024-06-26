@@ -2,6 +2,6 @@
 import { Response } from "express";
 
 export interface IDownloadFileDTO {
-    filename: string,
+    name: string
     response: Response
 }
