@@ -52,7 +52,6 @@ export const File = {
         return response.status(201).send("operation completed: add new file");
     },
     handleDownload(credentials: IDownloadFileDTO): StreamableFile {
-        console.log(credentials)
         const folder = resolve("archive", credentials.name);
 
         if (!existsSync(folder)) {
